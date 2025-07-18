@@ -138,7 +138,8 @@ addnode:
 		jr $ra			# Retornamos
 	
 # a0: node address to delete
-# a1: list address where node is deleted
+# a1: list address where node is deleted -> CATEGORIAS: a1 -> cclist,  OBJETOS: -> 1° objeto List
+# iniciales: CATEGORIAS: $t0 -> cclist ,OBJETOS: $t0 -> 1° objeto List
 delnode:
 	addi $sp, $sp, -8		# reserva de espacio en la pila para a0 y ra
 	sw $ra, 8($sp)			# guardo direccion de retorno 
@@ -150,15 +151,15 @@ delnode:
 	node:	#si hay mas de un nodo
 		beq $a0, $t0, delnode_point_self
 		lw $t1, 0($a0) 			# get address to prev node
-		sw $t1, 0($t0)			# el primer campo del nodo siguiente al eliminar ahora apunta al nodo anterior al nodo a eliminar
-		sw $t0, 12($t1)			# el campo nextnodo del nodo anterior a eliminar ahora apunta al nodo siguiente al nodo a eliminar
-		lw $t1, 0($a1) 			# get address to first node 
+		sw $t1, 0($t0)			# campo prev de nodo siguiente apunta a nodo anterior del nodo a eliminar
+		sw $t0, 12($t1)			# campo next de nodo anterior apunta a nodo siguiente del nodo a eliminar
+		lw $t1, 0($a1) 			# CATEGORIAS-> carga el campo al que apunta la cclist, OBJETOS -> ultimo nodo 
 	again:
-		bne $a0, $t1, delnode_exit	# si el nodo eliminado no era el primer nodo de la lista de categorias, salta a etiqueta
-		sw $t0, ($a1) 			# si lo era, ahora la cclista apunta al siguiente nodo 
+		bne $a0, $t1, delnode_exit	# CATEGORIA -> si no es la primera, salta OBJETOS->salta siempre (porque a0 tiene la direccion de un nodo desreferenciado)
+		sw $t0, ($a1) 			# CATEGORIA-> ahora la lista apunta al siguiente nodo. OBJETO-> NO SE ACTUALIZA EN ESTA FUNCION. 
 		j delnode_exit			# salto incondicional
 	delnode_point_self:
-		sw $zero, ($a1)	 		# only one node
+		sw $zero, ($a1)	 		# only one node CATEGORIA-> CCLIST==NULL , OBJETOS-> campro prev ==NULL 
 	delnode_exit:
 		jal sfree			# llamada para liberar el nodo
 		lw $ra, 8($sp)			# restauramos ra a su valor previo a la funcion 
@@ -510,7 +511,7 @@ listobjects:
         	addiu $sp, $sp, 4                  # Liberar el espacio reservado en la pila.
         	jr $ra
 #Fin listobjects
-
+#t0 -> lista de la que vamos a eliminar
 delobject:
 	addiu $sp, $sp, -4                     # Reserva espacio en la pila
     	sw $ra, 4($sp)                         # Guarda el valor de retorno
