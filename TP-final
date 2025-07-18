@@ -97,8 +97,8 @@ sbrk:	#solicita memoria
 	jr $ra			#saltamos a la diccion de retorno	
 sfree:  
 	lw $t0, slist		# Cargamos direccion del actual encabezado de slist
-	sw $t0, 12($a0)		# ($a0) campo next nodo -> apunta a la lista 
-	sw $a0, slist		# el campo prevnodo de a0 apunta a la lista 
+	sw $t0, 12($a0)		#  
+	sw $a0, slist		# 
 	jr $ra			# saltamos a la diccion de retorno
 #FIN Funciones de memoria
 
